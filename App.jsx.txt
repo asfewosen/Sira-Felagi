@@ -1,0 +1,115 @@
+import React, { useState } from "react";
+
+// Initial sample categories for the marketplace
+const CATEGORIES = [
+  { id: "dev", icon: "💻", name: "Web & App Dev" },
+  { id: "design", icon: "🎨", name: "Graphic Design" },
+  { id: "writing", icon: "✍️", name: "Writing & Translation" },
+  { id: "video", icon: "🎬", name: "Video & Animation" }
+];
+
+// Initial sample listings
+const INITIAL_GIGS = [
+  { id: 1, title: "I will build a modern website for your business", seller: "Dawit A.", rating: 4.9, price: 1200, category: "dev", location: "Addis Ababa" },
+  { id: 2, title: "I will design a professional logo for your brand", seller: "Hana T.", rating: 5.0, price: 500, category: "design", location: "Bahir Dar" },
+  { id: 3, title: "I will translate documents from English to Amharic", seller: "Yonas M.", rating: 4.8, price: 300, category: "writing", location: "Hawassa" }
+];
+
+export default function App() {
+  const [page, setPage] = useState("home");
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [toast, setToast] = useState(null);
+  const [gigs, setGigs] = useState(INITIAL_GIGS);
+  const [form, setForm] = useState({ title: "", category: "dev", price: "", city: "" });
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const filteredGigs = activeCategory === "all" ? gigs : gigs.filter(g => g.category === activeCategory);
+
+  const handlePost = () => {
+    if (!form.title || !form.price || !form.city) {
+      showToast("⚠️ Please fill in all fields!");
+      return;
+    }
+    const newGig = {
+      id: Date.now(), title: form.title, seller: "You",
+      rating: 5.0, price: parseInt(form.price),
+      category: form.category, location: form.city
+    };
+    setGigs([newGig, ...gigs]);
+    showToast("🎉 Your gig is live on SiraLink!");
+    setPage("browse");
+  };
+
+  return (
+    <div style={{ background: "#0f0d0a", color: "#f0e8d8", minHeight: "100vh", fontFamily: "sans-serif", padding: "20px" }}>
+      {/* NAVBAR */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #2e2820", paddingBottom: "20px" }}>
+        <h2 style={{ color: "#d4a017", cursor: "pointer" }} onClick={() => setPage("home")}>SiraLink</h2>
+        <div>
+          <button style={{ background: "transparent", color: "#f0e8d8", border: "none", margin: "0 10px", cursor: "pointer" }} onClick={() => { setPage("browse"); setActiveCategory("all"); }}>Browse</button>
+          <button style={{ background: "#d4a017", color: "#0f0d0a", border: "none", padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }} onClick={() => setPage("post")}>Post a Gig</button>
+        </div>
+      </div>
+
+      {/* HOME PAGE */}
+      {page === "home" && (
+        <div style={{ textAlign: "center", padding: "60px 20px" }}>
+          <h1 style={{ fontSize: "36px", marginBottom: "15px" }}>Ethiopia's Freelance Marketplace</h1>
+          <p style={{ color: "#8a7a65", marginBottom: "30px" }}>Find local experts or earn money by selling your digital services.</p>
+          <button style={{ background: "#d4a017", color: "#0f0d0a", border: "none", padding: "14px 28px", fontSize: "16px", fontWeight: "bold", borderRadius: "6px", cursor: "pointer" }} onClick={() => setPage("browse")}>Explore Marketplace</button>
+        </div>
+      )}
+
+      {/* BROWSE PAGE */}
+      {page === "browse" && (
+        <div style={{ padding: "20px 0" }}>
+          <h3>Available Gigs</h3>
+          <div style={{ display: "flex", gap: "10px", margin: "20px 0" }}>
+            <button style={{ background: activeCategory === "all" ? "#d4a017" : "#1a1612", color: activeCategory === "all" ? "#0f0d0a" : "#f0e8d8", border: "1px solid #2e2820", padding: "6px 12px", borderRadius: "20px", cursor: "pointer" }} onClick={() => setActiveCategory("all")}>All</button>
+            {CATEGORIES.map(c => (
+              <button key={c.id} style={{ background: activeCategory === c.id ? "#d4a017" : "#1a1612", color: activeCategory === c.id ? "#0f0d0a" : "#f0e8d8", border: "1px solid #2e2820", padding: "6px 12px", borderRadius: "20px", cursor: "pointer" }} onClick={() => setActiveCategory(c.id)}>{c.icon} {c.name}</button>
+            ))}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
+            {filteredGigs.map(gig => (
+              <div key={gig.id} style={{ background: "#1a1612", border: "1px solid #2e2820", padding: "20px", borderRadius: "10px" }}>
+                <h4 style={{ color: "#d4a017", marginBottom: "10px" }}>{gig.title}</h4>
+                <p style={{ fontSize: "13px", color: "#8a7a65", margin: "5px 0" }}>📍 {gig.location} | Seller: {gig.seller}</p>
+                <hr style={{ borderColor: "#2e2820", margin: "12px 0" }} />
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>⭐ {gig.rating}</span>
+                  <strong style={{ color: "#d4a017" }}>{gig.price} ETB</strong>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* POST A GIG PAGE */}
+      {page === "post" && (
+        <div style={{ maxWidth: "500px", margin: "40px auto", background: "#1a1612", padding: "30px", borderRadius: "10px", border: "1px solid #2e2820" }}>
+          <h3 style={{ marginBottom: "20px" }}>Create your Service Listing</h3>
+          <div>
+            <label style={{ display: "block", fontSize: "12px", color: "#8a7a65", marginBottom: "5px" }}>GIG TITLE</label>
+            <input style={{ width: "100%", padding: "10px", marginBottom: "15px", background: "#0f0d0a", border: "1px solid #2e2820", color: "#f0e8d8", borderRadius: "4px" }} placeholder="e.g. I will build a mobile app..." value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+            
+            <label style={{ display: "block", fontSize: "12px", color: "#8a7a65", marginBottom: "5px" }}>YOUR CITY</label>
+            <input style={{ width: "100%", padding: "10px", marginBottom: "15px", background: "#0f0d0a", border: "1px solid #2e2820", color: "#f0e8d8", borderRadius: "4px" }} placeholder="e.g. Addis Ababa" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} />
+
+            <label style={{ display: "block", fontSize: "12px", color: "#8a7a65", marginBottom: "5px" }}>PRICE (ETB)</label>
+            <input style={{ width: "100%", padding: "10px", marginBottom: "25px", background: "#0f0d0a", border: "1px solid #2e2820", color: "#f0e8d8", borderRadius: "4px" }} type="number" placeholder="500" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} />
+
+            <button style={{ width: "100%", background: "#d4a017", color: "#0f0d0a", padding: "12px", border: "none", fontWeight: "bold", borderRadius: "6px", cursor: "pointer", fontSize: "15px" }} onClick={handlePost}>Publish to SiraLink</button>
+          </div>
+        </div>
+      )}
+
+      {toast && <div style={{ position: "fixed", bottom: "20px", right: "20px", background: "#1a1612", border: "1px solid #d4a017", padding: "12px 24px", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}>{toast}</div>}
+    </div>
+  );
+}
